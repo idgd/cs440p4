@@ -43,7 +43,7 @@ def FIFO(p,slots):
 		if f in s:
 
 			for g in range(1,len(r)):
-				if g - 1 == s.index(f): r[g] += "* "
+				if g - 1 == s.index(f): r[g] += "+ "
 				else: r[g] += "  "
 
 		# if empty slot exists
