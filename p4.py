@@ -237,10 +237,12 @@ def pr(s):
 			print("######## wrapping", f)
 			for g in s:
 				print(g[:8],g[(w * f) + 8:(w * f) + w - 2])
-	print()
 
 print()
 pr(FIFO(pattern,slots))
+print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
 pr(LRU(pattern,slots))
+print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
 pr(MIN(pattern,slots))
+print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
 pr(RAND(pattern,slots))
