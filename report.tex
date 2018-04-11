@@ -22,7 +22,9 @@
         numbersep=5pt,
         numberstyle=\tiny,
         title=\lstname,
-				tabsize=4}
+				tabsize=4,
+				breakatwhitespace=true,
+				breaklines=true}
 
 \microtypecontext{spacing=nonfrench}
 
@@ -315,7 +317,7 @@ pr(RAND(pattern,slots))
 \section{Output}
 
 Here, I will discuss the the printing function for both unwrapped (exactly to spec) and wrapped (not to spec, but hopefully in good taste).
-Firstly, I will show output of the program as a whole for an unwrapped print.
+Firstly, I will show pattern output of the program for an unwrapped print.
 
 \begin{lstlisting}
 ptrn lngth: 25
@@ -349,7 +351,7 @@ Each function (except \texttt{RAND}, due to the random nature, and \texttt{pr}, 
 This means it edits no global state, only working on its own copies of input and producing unique output (not modifying global state and returning that).
 
 Now that we have gone over the output in its spec-compliant form, now let's delve into the output in wrapping form.
-Here is the output if it has to wrap:
+Here is the pattern output if it has to wrap:
 
 \begin{lstlisting}
 ptrn lngth: 70
@@ -413,5 +415,122 @@ RAND  2:    +     + B +
 \end{lstlisting}
 
 As can be seen, each one wraps around all of its lines to produce a generally nice-looking output with clear indications of what is related to what.
+
+The way this is done relies pretty heavily on the structure of the return values, and also happens to be a disgusting hack.
+I will post the full code of the printing function here, and then break it down in a separate listing as psuedocode with detailed explanations as to what's going on.
+
+\subsection{Disgusting Hack}
+
+\begin{lstlisting}
+# necessary imports
+from subprocess import run, PIPE
+
+def pr(s):
+	# disgusting hack to print according to spec on Linux
+	wb = run(["tput", "cols"], stdout=PIPE)
+	ws = wb.stdout.decode("utf-8")
+	w = int("".join(ws.split()))
+	for f in range((len(s[0]) // w) + 1):
+		if f == 0:
+			for g in s:
+				print(g[:w])
+		else:
+			print("######## wrapping", f)
+			for g in s:
+				print(g[:8],g[(w * f) + 8:(w * f) + w - 2])
+\end{lstlisting}
+
+This code is dense and somewhat confusing.
+However, if we were to implement the program without wrapping, due to the way that the return variables of each algorithm are structured, the code could be reduced to two lines:
+
+\begin{lstlisting}
+def pr(s):
+	for f in s: print(f)
+\end{lstlisting} 
+
+The longer one can be broken down into a few english descriptions of what's going on.
+The return structure is each line of the output separated into a list.
+So, for example, the actual return value of, for example, \texttt{FIFO}, given \texttt{10,4,2} as input would be:
+
+\begin{lstlisting}
+['Ref Str: B B D A A C C A D D',
+ 'FIFO  1: B +   A +     + D + ',
+ 'FIFO  2:     D     C +       ']
+\end{lstlisting}
+
+With this structure, it's easy to see how a for loop could print this array properly.
+However, if we wanted to wrap the output nicely, we have to do something significantly more complex.
+I will demonstrate this with psuedocode of the \texttt{pr()} function.
+
+\begin{lstlisting}
+def pr(s):
+	# find the width of the current terminal
+	# this is the first three non-comment lines of the actual function
+	# use the unix tool tput to find the cols of the current TTY
+	w = width(current_terminal)
+	# iterate over the number of chunks that exceed the width
+	for f in range((len(s[0]) // w) + 1):
+		# the first one should be clean in case it doesn't need to wrap
+		if f == 0:
+			# do the one-liner, but only print up to the width
+			# the [:w] slice returns a substring up to w chars long
+			for g in s: print(g[:w])
+		else:
+			# print the chunk it's on
+			print("######## wrapping", f)
+			# one liner but disgusting
+			for g in s:
+				# print up to the indicators (RAND  1: etc) by printing g[:8]
+				# then print from 8 + (width * current_chunk) up to
+				# next chunk
+				print(g[:8],g[(w * f) + 8:(w * f) + w - 2])
+\end{lstlisting}
+
+The hack extensively uses Python slicing.
+Slicing takes an ordered iterable (strings or lists, for example) and returns a new ordered iterable by these rules: \texttt{[start:stop:skip]}.
+Each one of those variables is optional.
+Start will default to 0, stop to -1 (the end), and skip will default to 1 (every item).
+In our example, we used start and stop, but not skip.
+
+The first and second slice, \texttt{g[:w]} and \texttt{g[:8]}, only used stop, stopping at the width of the terminal and 8, respectively.
+The third disgusting one used start and stop.
+The start was \texttt{(w * f) + 8}.
+\texttt{w} here is the width of the terminal, while \texttt{f} is the ``chunk'' of the output we are on.
+We then add 8 to make sure we are aligned with the previously printed introductory chunk.
+We stop at \texttt{(w * f) + w - 2}.
+We go to the end of the current chunk by going to the start, adding the width, and subtracting two to ensure no wrapping by the terminal.
+
+\subsection{Scoring}
+
+Finally, the scoring.
+I was tired when I wrote this code so I used some pretty brute-force methods; but basically, it simply iterates over every output string, counts the occurences of hits (+), and uses that as the score to divide by the global pattern length.
+It then prints each one, and then the best and worst using a bit of list comprehension.
+The code is as follows:
+
+\begin{lstlisting}
+scores_counter = [fifo,lru,m,rand]
+count = [0] * 4
+for f in scores_counter:
+	for g in f: count[scores_counter.index(f)] += g.count("+")
+	for g in count: g /= p
+
+scores = [f / p for f in count]
+
+print("\nCache Hit Rates:\n")
+print("FIFO : " + str(count[0]) + " of " + str(p) + " = " + str(scores[0]))
+print("LRU  : " + str(count[1]) + " of " + str(p) + " = " + str(scores[1]))
+print("MIN  : " + str(count[2]) + " of " + str(p) + " = " + str(scores[2]))
+print("FIFO : " + str(count[3]) + " of " + str(p) + " = " + str(scores[3]))
+print("\nBest:  " + scores_counter[scores.index(max(scores))][1][:4])
+print("Worst: " + scores_counter[scores.index(min(scores))][1][:4])
+\end{lstlisting}
+
+It isn't pretty, but it produces the correct scoring output on every program run.
+
+\section{Conclusion}
+
+To wrap it all up, the program does the hard parts (the algorithms) elegantly and the easy parts (printing) in a brutish kind of way.
+The program could be improved, but overall, the important parts are very elegantly and minimally implemented.
+Each one is correct for every iteration and test I've thrown at it, and I am proud of what I've done.
 
 \end{document}
