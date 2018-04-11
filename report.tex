@@ -531,6 +531,64 @@ It isn't pretty, but it produces the correct scoring output on every program run
 
 To wrap it all up, the program does the hard parts (the algorithms) elegantly and the easy parts (printing) in a brutish kind of way.
 The program could be improved, but overall, the important parts are very elegantly and minimally implemented.
-Each one is correct for every iteration and test I've thrown at it, and I am proud of what I've done.
+To finish off, here's the full and finished output with every bell and whistle that the printing is capable off triggered:
 
+\begin{lstlisting}
+ptrn lngth: 35
+uniq chars: 10
+slot lngth: 3
+
+Ref Str: A G H D A E G E H J D B E G E A C A A J A
+FIFO  1: A     D     G       D     G           J
+FIFO  2:   G     A       H     B       A   + +   +
+FIFO  3:     H     E   +   J     E   +   C
+######## wrapping 1
+Ref Str: F B A F F D E H D D
+FIFO  1:       F +     H
+FIFO  2: + B       D     + +
+FIFO  3:     A       E
+--------------------------------------------------
+---------------------------
+Ref Str: A G H D A E G E H J D B E G E A C A A J A
+LRU   1: A     D     G     J     E   +         J
+LRU   2:   G     A       H     B       A   + +   +
+LRU   3:     H     E   +     D     G     C
+######## wrapping 1
+Ref Str: F B A F F D E H D D
+LRU   1: F     + +     H
+LRU   2:   B       D     + +
+LRU   3:     A       E
+--------------------------------------------------
+---------------------------
+Ref Str: A G H D A E G E H J D B E G E A C A A J A
+MIN   1: A       + E   +         +   +   C
+MIN   2:   G         +   H J                   +
+MIN   3:     H D             + B   G   A   + +   +
+######## wrapping 1
+Ref Str: F B A F F D E H D D
+MIN   1: +     + + D     + +
+MIN   2:   B         E H
+MIN   3:     +
+--------------------------------------------------
+---------------------------
+Ref Str: A G H D A E G E H J D B E G E A C A A J A
+RAND  1: A       +         J           A   + +   +
+RAND  2:   G       E   + H     B   G     C     J
+RAND  3:     H D     G       D   E   +
+######## wrapping 1
+Ref Str: F B A F F D E H D D
+RAND  1:     A
+RAND  2:   B         E H
+RAND  3: F     + + D     + +
+
+Cache Hit Rates:
+
+FIFO : 10 of 35 = 0.2857142857142857
+LRU  : 10 of 35 = 0.2857142857142857
+MIN  : 17 of 35 = 0.4857142857142857
+FIFO : 11 of 35 = 0.3142857142857143
+
+Best:  MIN
+Worst: FIFO
+\end{lstlisting}
 \end{document}
