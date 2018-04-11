@@ -72,6 +72,7 @@ def FIFO(p,slots):
 			# otherwise, wrap to 0
 			else:
 				i = 0
+	print(r)
 
 	# return struct
 	return(r)
@@ -239,10 +240,30 @@ def pr(s):
 				print(g[:8],g[(w * f) + 8:(w * f) + w - 2])
 
 print()
-pr(FIFO(pattern,slots))
+fifo = FIFO(pattern,slots)
+pr(fifo)
 print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
-pr(LRU(pattern,slots))
+lru = LRU(pattern,slots)
+pr(lru)
 print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
-pr(MIN(pattern,slots))
+m = MIN(pattern,slots)
+pr(m)
 print(''.join(['-'] * (len("         " + ' '.join(pattern)) - 1)))
-pr(RAND(pattern,slots))
+rand = RAND(pattern,slots)
+pr(rand)
+
+scores_counter = [fifo,lru,m,rand]
+count = [0] * 4
+for f in scores_counter:
+	for g in f: count[scores_counter.index(f)] += g.count("+")
+	for g in count: g /= p
+
+scores = [f / p for f in count]
+
+print("\nCache Hit Rates:\n")
+print("FIFO : " + str(count[0]) + " of " + str(p) + " = " + str(scores[0]))
+print("LRU  : " + str(count[1]) + " of " + str(p) + " = " + str(scores[1]))
+print("MIN  : " + str(count[2]) + " of " + str(p) + " = " + str(scores[2]))
+print("FIFO : " + str(count[3]) + " of " + str(p) + " = " + str(scores[3]))
+print("\nBest:  " + scores_counter[scores.index(max(scores))][1][:4])
+print("Worst: " + scores_counter[scores.index(min(scores))][1][:4])
