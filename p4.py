@@ -144,6 +144,7 @@ def MIN(p,slots):
 				if g - 1 == s.index(p[f]): r[g] += "+ "
 				else: r[g] += "  "
 
+		# if empty slot exists
 		elif None in s:
 			# set slot index to first None
 			i = s.index(None)
@@ -154,6 +155,7 @@ def MIN(p,slots):
 			# set slot to missed item
 			s[i] = p[f]
 
+		# if no empty slots exist
 		else:
 			# index of next use in pattern
 			il = []
@@ -179,6 +181,48 @@ def MIN(p,slots):
 	# return struct
 	return(r)
 
+def RAND(p,slots):
+	# duplicate slots to ensure function purity
+	s = slots[:]
+
+	# printing struct
+	r = ["RAND  " + str(f) + ": " for f in range(len(s) + 1)]
+	r[0] = "Ref Str: " + " ".join(p)
+
+	for f in p:
+
+		# if item exists in slots
+		if f in s:
+			# write cache hit
+			for g in range(1,len(r)):
+				if g - 1 == s.index(f): r[g] += "+ "
+				else: r[g] += "  "
+
+		# if empty slot exists
+		elif None in s:
+			# set slot index to first None
+			i = s.index(None)
+			# write cache miss
+			for g in range(1,len(r)):
+				if g - 1 == i: r[g] += f + " "
+				else: r[g] += "  "
+			# set slot to missed item
+			s[i] = f
+
+		# if no empty slots exist
+		else:
+			# random index
+			i = randint(0,len(s) - 1)
+			# write cache miss
+			for g in range(1,len(r)):
+				if g - 1 == i: r[g] += f + " "
+				else: r[g] += "  "
+			# set random slot to missed item
+			s[i] = f
+
+	# return struct
+	return(r)
+
 def pr(s):
 	for f in s:
 		print(f)
@@ -186,3 +230,4 @@ def pr(s):
 pr(FIFO(pattern,slots))
 pr(LRU(pattern,slots))
 pr(MIN(pattern,slots))
+pr(RAND(pattern,slots))
