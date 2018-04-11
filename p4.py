@@ -127,9 +127,62 @@ def LRU(p,slots):
 	# return struct
 	return(r)
 
+def MIN(p,slots):
+	# duplicate slots to ensure function purity
+	s = slots[:]
+
+	# printing struct
+	r = ["MIN   " + str(f) + ": " for f in range(len(s) + 1)]
+	r[0] = "Ref Str: " + " ".join(p)
+
+	for f in range(len(p)):
+
+		# if item exists in slots
+		if p[f] in s:
+			# write cache hit
+			for g in range(1,len(r)):
+				if g - 1 == s.index(p[f]): r[g] += "+ "
+				else: r[g] += "  "
+
+		elif None in s:
+			# set slot index to first None
+			i = s.index(None)
+			# write cache miss
+			for g in range(1,len(r)):
+				if g - 1 == i: r[g] += p[f] + " "
+				else: r[g] += "  "
+			# set slot to missed item
+			s[i] = p[f]
+
+		else:
+			# index of next use in pattern
+			il = []
+			# find the index for each item in slot
+			for g in s:
+				if g in p[f:]:
+					il.append(p[f:].index(g) + f)
+				else:
+					il.append(101)
+			# set index to index of furthest item
+			if 101 in il:
+				# if it doesn't occur, just set it to the first one not to occur
+				i = il.index(101)
+			else:
+				i = s.index(p[max(il)])
+			# write cache miss
+			for g in range(1,len(r)):
+				if g - 1 == i: r[g] += p[f] + " "
+				else: r[g] += "  "
+			# set slot to missed item
+			s[i] = p[f]
+
+	# return struct
+	return(r)
+
 def pr(s):
 	for f in s:
 		print(f)
 
 pr(FIFO(pattern,slots))
 pr(LRU(pattern,slots))
+pr(MIN(pattern,slots))
