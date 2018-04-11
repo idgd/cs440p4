@@ -72,7 +72,6 @@ def FIFO(p,slots):
 			# otherwise, wrap to 0
 			else:
 				i = 0
-	print(r)
 
 	# return struct
 	return(r)
