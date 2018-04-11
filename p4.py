@@ -255,14 +255,16 @@ scores_counter = [fifo,lru,m,rand]
 count = [0] * 4
 for f in scores_counter:
 	for g in f: count[scores_counter.index(f)] += g.count("+")
-	for g in count: g /= p
 
 scores = [f / p for f in count]
 
 print("\nCache Hit Rates:\n")
+# count stores count of hits, scores stores score (hits/total length)
 print("FIFO : " + str(count[0]) + " of " + str(p) + " = " + str(scores[0]))
 print("LRU  : " + str(count[1]) + " of " + str(p) + " = " + str(scores[1]))
 print("MIN  : " + str(count[2]) + " of " + str(p) + " = " + str(scores[2]))
 print("FIFO : " + str(count[3]) + " of " + str(p) + " = " + str(scores[3]))
+# takes advantage of the fact that scores_counter stores a list of lists
+# [1] accesses second line, [:4] accesses name strings
 print("\nBest:  " + scores_counter[scores.index(max(scores))][1][:4])
 print("Worst: " + scores_counter[scores.index(min(scores))][1][:4])
