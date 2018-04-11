@@ -1,7 +1,7 @@
 from random import choice, randint
 from string import ascii_uppercase as au
+from subprocess import run, PIPE
 import sys
-import os
 
 # take user input and ensure in ranges
 try:
@@ -225,9 +225,21 @@ def RAND(p,slots):
 	return(r)
 
 def pr(s):
-	for f in s:
-		print(f)
+	# disgusting hack to print according to spec on Linux
+	wb = run(["tput", "cols"], stdout=PIPE)
+	ws = wb.stdout.decode("utf-8")
+	w = int("".join(ws.split()))
+	for f in range((len(s[0]) // w) + 1):
+		if f == 0:
+			for g in s:
+				print(g[:w])
+		else:
+			print("######## wrapping", f)
+			for g in s:
+				print(g[:8],g[(w * f) + 8:(w * f) + w - 2])
+	print()
 
+print()
 pr(FIFO(pattern,slots))
 pr(LRU(pattern,slots))
 pr(MIN(pattern,slots))
