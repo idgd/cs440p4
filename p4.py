@@ -1,6 +1,7 @@
 from random import choice, randint
 from string import ascii_uppercase as au
 import sys
+import os
 
 # take user input and ensure in ranges
 try:
