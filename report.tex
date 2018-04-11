@@ -14,14 +14,15 @@
 
 \lstset{language=Python,
         basicstyle=\footnotesize \ttfamily,
-        commentstyle=\color{Emerald},
+        commentstyle=\color{Green},
         keywordstyle=\color{Cyan},
-        stringstyle=\color{DarkOrchid},
+        stringstyle=\color{Magenta},
         showstringspaces=false,
         numbers=left,
         numbersep=5pt,
         numberstyle=\tiny,
-        title=\lstname}
+        title=\lstname,
+				tabsize=4}
 
 \microtypecontext{spacing=nonfrench}
 
@@ -55,10 +56,362 @@ Each algorithm is then called and printed using the utility function, after whic
 However, I will also write psuedocode for each algorithm, including the printing utility function, here in a set of listings.
 Starting with \texttt{FIFO}.
 
+\subsection{FIFO}
+
 \begin{lstlisting}
+def FIFO(pattern,slots):
+	# index in slots to replace
+	index = 0
+	# return special printing struct
+	# inits with "FIFO  #: " for number of slots + 1
+	# where # is the slot number
+	r = ["FIFO  " + i + ": " for i in range(len(slots) + 1)]
+	# redefine first line to have the input pattern
+	# with 1 space after every char as per assignment
+	r[0] = "Ref Str: " + " ".join(pattern)
 
+	# for each item in the pattern, do stuff
+	for f in pattern:
 
+		# if the item is in the slots
+		# wri():
+		# magic write to proper place function for psuedocode
+		# it writes a "+ " to the printing struct when it hits
+		# and the proper output (f + " ") if it misses
+		if f in slots: wri("hit")
+
+		# if there's an empty slot
+		elif None in slots:
+			# magic write
+			wri(f)
+			# insert at first available empty slot
+			slots[slots.index(None)] = f
+
+		# if no empty slots exist
+		else:
+			wri(f)
+			# replace slot at index
+			slots[index] = f
+			# if index is smaller than number of slots, increment
+			if index < len(slots) - 1:
+				index++
+			# otherwise, reset to 0
+			else:
+				index = 0
+	# return print struct
+	return(r)
 
 \end{lstlisting}
+
+As stated in the comments, \texttt{wri()} is a magic function purely for psuedocode; looking in the actual code, each instance is replaced by three lines that depend on the algorithm for their logic.
+In the end, it ends up doing the same thing, producing good output, as can be seen here:
+
+\begin{lstlisting}
+Ref Str: D C D A B D B C C D
+FIFO  1: D   + A   D       +
+FIFO  2:   C     B   + C +
+\end{lstlisting}
+
+The output will also wrap nicely, but we will cover that portion more extensively in the output section. For now, we will take a look at \texttt{LRU}.
+
+\subsection{LRU}
+
+\begin{lstlisting}
+def LRU(pattern,slots):
+	# here, instead of a plain index, we keep a time index of each use
+	# the time is relative to the place in pattern
+	# EG in the pattern ABCDEABC, the first B is time 1 (0-indexed)
+	index = [0 for f in slots]
+
+	# same special printing struct
+	r = ["LRU   " + i + ": " for i in range(len(slots) + 1)]
+	r[0] = "Ref Str: " + " ".join(pattern)
+
+	# for each item in the pattern, do stuff, by index!
+	for f in range(len(pattern)):
+
+		# if the item is in the slots
+		if pattern[f] in slots:
+			# same magic write
+			wri("hit")
+			# this time, set the index of the hit to the current time
+			# f, or time, here is the index as defined in line 4
+			index[slots.index(pattern[f])] = f
+			# breaking it down: slots.index() finds the corresponding
+			# slot for the index list. We pass in the current item
+			# in the pattern (pattern[f]) to find where we hit
+			# we then set that to the current time in the index
+
+		# if there's an empty slot
+		elif None in slots:
+			# magic write
+			wri(pattern[f])
+			# insert at first available empty slot
+			# this time, record the index for reuse in next line
+			i = slots.index(None)
+			slots[i] = pattern[f]
+			index[i] = f
+
+		# if no empty slots exist
+		else:
+			# lots of indexes here! to put it in english:
+			# find the number index of the smallest item in the index var
+			i = index.index(min(index))
+			# magic write
+			wri(pattern[f])
+			# set least recently used slot to new item
+			slots[i] = pattern[f]
+			# set current slot to most recently used
+			index[i] = f
+	# return print struct
+	return(r)
+
+\end{lstlisting}
+
+The output of this function with the same input as the previously shown \texttt{FIFO} output would look like so:
+\vspace{-2em}
+
+\begin{lstlisting}
+Ref Str: D C D A B D B C C D
+LRU   1: D   +   B   +     D
+LRU   2:   C   A   D   C +
+\end{lstlisting}
+
+Moving on to the \texttt{MIN} algorithm.
+
+\subsection{MIN}
+
+\begin{lstlisting}
+def MIN(pattern,slots):
+	# despite it being the technically impossible one,
+	# it actually has the simplest implementation, given the pattern
+
+	# printing struct
+	r = ["MIN   " + i + ": " for i in range(len(slots) + 1)]
+	r[0] = "Ref Str: " + " ".join(pattern)
+
+	# for each item in pattern by index
+	for f in range(len(pattern)):
+
+		# if item exists, cache hit
+		if pattern[f] in slots: wri("hit")
+
+		# if empty slot exists
+		elif None in slots:
+			wri(pattern[f])
+			slots[slots.index(None)] = pattern[f]
+
+		# if no empty slots exist
+		else:
+			# here's where the logic happens!
+			index_list = []
+			# iterate over the slots
+			# find the next index (by pattern) for each item
+			for g in slots:
+				# if it exists, append its next index
+				# to the index_list
+				if g in pattern[f:]:
+					index_list.append(pattern[f:].index(g) + f)
+				# otherwise append an impossible index
+				# (as len(pattern) !> 100)
+				else:
+					index_list.append(101)
+			# set index in slot to the index
+			# of the greatest item in index_list
+			if 101 in index_list: i = index_list.index(101)
+			else: i = slots.index(pattern[max(index_list)])
+			# write cache miss
+			wri(pattern[f])
+			# set slot to missed item
+			slots[i] = pattern[f]
+	# return print struct
+	return(r)
+
+\end{lstlisting}
+
+Hopefully the explanations in the last \texttt{else} statement made sense.
+They are an accurate description of what occurs.
+The output of this function, with the same input as the others, would look like so:
+
+\begin{lstlisting}
+Ref Str: D C D A B D B C C D
+MIN   1: D   +     +       +
+MIN   2:   C   A B   + C +
+\end{lstlisting}
+
+Now, finally, the easiest one to describe, \texttt{RAND}.
+
+\subsection{RAND}
+
+\begin{lstlisting}
+def RAND(pattern,slots):
+	# printing struct
+	r = ["RAND  " + i + ": " for i in range(len(slots) + 1)]
+	r[0] = "Ref Str: " + " ".join(pattern)
+
+	# for each in pattern
+	for f in pattern:
+		# if cache hit
+		if f in slots: wri("hit")
+		# if empty slot exists
+		if None in slots:
+			wri(f)
+			slots[slots.index(None)] = f
+		# if no empty slots available
+		else:
+			# pick a random one
+			slots[random(len(slots))] = f
+			wri(f)
+
+	return(r)
+\end{lstlisting}
+
+As the \texttt{RAND} function is non-deterministic, here is the output of one iteration of the same input as the others.
+However, most outputs of \texttt{RAND} should look generally similar.
+
+\begin{lstlisting}
+Ref Str: D C D A B D B C C D
+RAND  1: D   +     +   C + D
+RAND  2:   C   A B   +
+\end{lstlisting}
+
+\subsection{Main}
+
+Finally for the psuedocode, we have to go over the main code; I will indicate the above function definitions with a simple \texttt{def NAME(...): ...} to indicate the function has been shrunk for size concerns.
+Here is the main body of the code in psuedocode:
+
+\begin{lstlisting}
+# take user input
+pattern_length = input("pattern length: ")
+unique_characters = input("unique characters: ")
+number_of_slots = input("number of slots: ")
+
+# if any errors occur
+if any not int: exit("not numbers")
+if 10 > pattern_length > 101: exit("out of range")
+if 2 > unique_characters,number_of_slots > 11: exit("out of range")
+
+# initialize the pattern
+pattern = [choose(lowercase_ascii[:unique_characters])
+           for f in range(pattern_length)]
+# initialize the slots
+slots = [None for f in range(number_of_slots)]
+
+def FIFO(...): ...
+def LRU(...): ...
+def MIN(...): ...
+def RAND(...): ...
+
+# special printing function, will show detail in output section
+dep pr(...): ...
+
+pr(FIFO(pattern,slots))
+pr(LRU(pattern,slots))
+pr(MIN(pattern,slots))
+pr(RAND(pattern,slots))
+
+\end{lstlisting}
+
+\section{Output}
+
+Here, I will discuss the the printing function for both unwrapped (exactly to spec) and wrapped (not to spec, but hopefully in good taste).
+Firstly, I will show output of the program as a whole for an unwrapped print.
+
+\begin{lstlisting}
+ptrn lngth: 25
+uniq chars: 5
+slot lngth: 3
+
+Ref Str: B D D E A A C A D E A B C C B C D C D E C A B D E
+FIFO  1: B       A +   +   E     C +   +   +     + A     E
+FIFO  2:   D +       C       A           D   +       B
+FIFO  3:       E         D     B     +         E       D
+---------------------------------------------------------
+Ref Str: B D D E A A C A D E A B C C B C D C D E C A B D E
+LRU   1: B       A +   +     +           D   +     A     E
+LRU   2:   D +       C     E     C +   +   +     +     D
+LRU   3:       E         D     B     +         E     B
+---------------------------------------------------------
+Ref Str: B D D E A A C A D E A B C C B C D C D E C A B D E
+MIN   1: B       A +   +     + B     +   D   +         +
+MIN   2:   D +           + E                   +         +
+MIN   3:       E     C           + +   +   +     + A B
+---------------------------------------------------------
+Ref Str: B D D E A A C A D E A B C C B C D C D E C A B D E
+RAND  1: B                   A   C +   + D C D     A   D E
+RAND  2:   D +       C   D     B     +               +
+RAND  3:       E A +   +   E                   + C
+\end{lstlisting}
+
+As can be seen, each piece of output is according to spec in the assignment sheet.
+The user's input is accepted and each function takes the appropriate variables to produce correct output.
+Each function (except \texttt{RAND}, due to the random nature, and \texttt{pr}, as it prints to the output) is also Pure.
+This means it edits no global state, only working on its own copies of input and producing unique output (not modifying global state and returning that).
+
+Now that we have gone over the output in its spec-compliant form, now let's delve into the output in wrapping form.
+Here is the output if it has to wrap:
+
+\begin{lstlisting}
+ptrn lngth: 70
+uniq chars: 4
+slot lngth: 2
+
+Ref Str: C B C B D C B D D C D B D D D A B A D A B A A B A B B
+FIFO  1: C   +   D   B     C     D + +   B     A   + +   +
+FIFO  2:   B   +   C   D +   + B       A   + D   B     +   + +
+######## wrapping 1
+Ref Str: A D A B D D B B B C D C C B B D D D D B C C C A D B C
+FIFO  1:   D     + +       C   + + B +         +       A   B
+FIFO  2: +   + B     + + +   D         + + + +   C + +   D   C
+######## wrapping 2
+Ref Str:  B C B D C B B
+FIFO  1:    C     + B +
+FIFO  2:  B   + D
+--------------------------------------------------------------
+--------------------------------------------------------------
+-----------------------
+Ref Str: C B C B D C B D D C D B D D D A B A D A B A A B A B B
+LRU   1: C   +   D   B     C   B       A   +   +   + +   +
+LRU   2:   B   +   C   D +   +   + + +   B   D   B     +   + +
+######## wrapping 1
+Ref Str: A D A B D D B B B C D C C B B D D D D B C C C A D B C
+LRU   1:   D   B     + + +   D     B +         +       A   B
+LRU   2: +   +   D +       C   + +     D + + +   C + +   D   C
+######## wrapping 2
+Ref Str:  B C B D C B B
+LRU   1:    +   D   B +
+LRU   2:  B   +   C
+--------------------------------------------------------------
+--------------------------------------------------------------
+-----------------------
+Ref Str: C B C B D C B D D C D B D D D A B A D A B A A B A B B
+MIN   1: C   +     + B     C   B         +   D   B     +   + +
+MIN   2:   B   + D     + +   +   + + + A   +   +   + +   +
+######## wrapping 1
+Ref Str: A D A B D D B B B C D C C B B D D D D B C C C A D B C
+MIN   1: +   + B     + + + C   + + B +         + C + + A     C
+MIN   2:   +     + +         +         + + + +           + B
+######## wrapping 2
+Ref Str:  B C B D C B B
+MIN   1:    +     + B +
+MIN   2:  B   + D
+--------------------------------------------------------------
+--------------------------------------------------------------
+-----------------------
+Ref Str: C B C B D C B D D C D B D D D A B A D A B A A B A B B
+RAND  1: C   +   D C   D +   + B D + +   B     A   + +   +
+RAND  2:   B   +     +     C           A   + D   B     +   + +
+######## wrapping 1
+Ref Str: A D A B D D B B B C D C C B B D D D D B C C C A D B C
+RAND  1:   +   B     + + +     C + B +         +       A
+RAND  2: +   +   D +       C D         + + + +   C + +   D B C
+######## wrapping 2
+Ref Str:  B C B D C B B
+RAND  1:  +   + D
+RAND  2:    +     + B +
+
+\end{lstlisting}
+
+As can be seen, each one wraps around all of its lines to produce a generally nice-looking output with clear indications of what is related to what.
 
 \end{document}
