@@ -263,8 +263,15 @@ print("\nCache Hit Rates:\n")
 print("FIFO : " + str(count[0]) + " of " + str(p) + " = " + str(scores[0]))
 print("LRU  : " + str(count[1]) + " of " + str(p) + " = " + str(scores[1]))
 print("MIN  : " + str(count[2]) + " of " + str(p) + " = " + str(scores[2]))
-print("FIFO : " + str(count[3]) + " of " + str(p) + " = " + str(scores[3]))
+print("RAND : " + str(count[3]) + " of " + str(p) + " = " + str(scores[3]))
 # takes advantage of the fact that scores_counter stores a list of lists
 # [1] accesses second line, [:4] accesses name strings
-print("\nBest:  " + scores_counter[scores.index(max(scores))][1][:4])
-print("Worst: " + scores_counter[scores.index(min(scores))][1][:4])
+
+winners = [f == max(count) for f in count]
+losers = [f == min(count) for f in count]
+win, lose = "", ""
+for f in range(len(winners)):
+	if winners[f]: win += scores_counter[f][1][:4] + " "
+	if losers[f]: lose += scores_counter[f][1][:4] + " "
+print("\nBest:  " + win)
+print("Worst: " + lose)
