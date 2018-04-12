@@ -170,7 +170,7 @@ def LRU(pattern,slots):
 
 \end{lstlisting}
 
-The output of this function with the same input as the previously shown \texttt{FIFO} output would look like so:
+The output of this function with the same input as the previously shown in \texttt{FIFO} would look like so:
 \vspace{-2em}
 
 \begin{lstlisting}
@@ -279,7 +279,7 @@ RAND  2:   C   A B   +
 
 \subsection{Main}
 
-Finally for the psuedocode, we have to go over the main code; I will indicate the above function definitions with a simple \texttt{def NAME(...): ...} to indicate the function has been shrunk for size concerns.
+Finally for the psuedocode, we have to go over the main code; I will indicate the above function definitions with a simple \texttt{def NAME(\ldots): \ldots} to indicate the function has been shrunk for size concerns.
 Here is the main body of the code in psuedocode:
 
 \begin{lstlisting}
@@ -350,7 +350,7 @@ The user's input is accepted and each function takes the appropriate variables t
 Each function (except \texttt{RAND}, due to the random nature, and \texttt{pr}, as it prints to the output) is also Pure.
 This means it edits no global state, only working on its own copies of input and producing unique output (not modifying global state and returning that).
 
-Now that we have gone over the output in its spec-compliant form, now let's delve into the output in wrapping form.
+Now that we have gone over the output in its spec-compliant form, let's delve into the output in wrapping form.
 Here is the pattern output if it has to wrap:
 
 \begin{lstlisting}
@@ -531,7 +531,7 @@ It isn't pretty, but it produces the correct scoring output on every program run
 
 To wrap it all up, the program does the hard parts (the algorithms) elegantly and the easy parts (printing) in a brutish kind of way.
 The program could be improved, but overall, the important parts are very elegantly and minimally implemented.
-To finish off, here's the full and finished output with every bell and whistle that the printing is capable off triggered:
+To finish off, here's the full and finished output with every bell and whistle that the printing is capable of triggered:
 
 \begin{lstlisting}
 ptrn lngth: 35
